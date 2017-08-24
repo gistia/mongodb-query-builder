@@ -1,0 +1,24 @@
+{
+  "name": "mongodb-query-builder",
+  "version": "0.1.0",
+  "description": "MongoDB Query Builder",
+  "main": "index.js",
+  "authors": [
+    "Felipe Coury <felipe.coury@gmail.com>",
+    "Vinicius Oliveira <me@vinioliveira.com>"
+  ],
+  "repository": "https://github.com/gistia/mongodb-query-builder",
+  "license": "ISC",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint --ext .js . src tests",
+    "test": "NODE_ENV=test ./node_modules/.bin/mocha --timeout 10000 *.test.js test/*.test.js test/**/*.test.js",
+    "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha --timeout 10000 --watch *.test.js test/*.test.js test/**/*.test.js",
+    "test:coverage": "NODE_ENV=test ISTANBUL_REPORTERS=text-summary,html ./node_modules/.bin/istanbul cover _mocha -R *.test.js -R test/*.test.js test/**/*.test.js"
+  },
+  "devDependencies": {
+    "chai": "^4.1.1",
+    "istanbul": "^0.4.5",
+    "mocha": "https://github.com/gistia/mocha.git"
+  },
+  "dependencies": {}
+}
