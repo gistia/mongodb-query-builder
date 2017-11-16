@@ -3,7 +3,6 @@ const expect = require('chai').expect;
 
 describe('Query Builder', () => {
   describe('pagination', () => {
-
     it('selects pagination', () => {
       const query = { page: 1, limit: 2 };
 
@@ -137,6 +136,15 @@ describe('Query Builder', () => {
 
       const result = QueryBuilder.build(query).filters;
       const expected = { 'Person.firstName': { $regex: 'oh', $options: 'i' } };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('converts null string into null', () => {
+      const query = { 'Person.firstName.eq': 'null' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { 'Person.firstName': { $eq: null } };
 
       expect(result).to.eql(expected);
     });

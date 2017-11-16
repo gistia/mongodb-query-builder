@@ -10,6 +10,14 @@ const OPERATORS = {
 
 const FILTERS_KEYWORDS = ['page', 'limit', 'sort'];
 
+const castValues = (value) => {
+  if (value === 'null') {
+    return null;
+  } else {
+    return value;
+  }
+};
+
 const getFilters = (query) => {
   return Object.keys(query)
     .filter(key => !FILTERS_KEYWORDS.includes(key))
@@ -17,8 +25,8 @@ const getFilters = (query) => {
       const field = key.split('.');
       const filterOperator = Object.keys(OPERATORS).includes(field[field.length - 1]) ? field.pop() : 'eq';
       const { op, options } = OPERATORS[filterOperator];
-      const filter = { [op]: query[key] };
-      if (options) Object.assign(filter,  options);
+      const filter = { [op]: castValues(query[key]) };
+      if (options) { Object.assign(filter,  options) };
       return Object.assign(acc, { [field.join('.')]: filter });
     }, {});
 };
