@@ -8,7 +8,12 @@ const OPERATORS = {
   gte:      { op: '$gte' },
 };
 
-const FILTERS_KEYWORDS = ['page', 'limit', 'sort'];
+const LOG_OPERATORS = {
+  and: '$and',
+  or: '$or',
+};
+
+const FILTERS_KEYWORDS = ['page', 'limit', 'sort', 'op'];
 
 const castValues = (value) => {
   if (value === 'null') {
@@ -19,6 +24,7 @@ const castValues = (value) => {
 };
 
 const getFilters = (query) => {
+  const operator = getOperator(query);
   return Object.keys(query)
     .filter(key => !FILTERS_KEYWORDS.includes(key))
     .reduce((acc, key) => {
@@ -27,8 +33,9 @@ const getFilters = (query) => {
       const { op, options } = OPERATORS[filterOperator];
       const filter = { [op]: castValues(query[key]) };
       if (options) { Object.assign(filter,  options) };
-      return Object.assign(acc, { [field.join('.')]: filter });
-    }, {});
+      acc[operator].push({ [field.join('.')]: filter })
+      return acc;
+    }, { [operator] : [] });
 };
 
 const getPagination = (query) => {
@@ -48,6 +55,11 @@ const getPagination = (query) => {
 const getSort = (query) => (
   query.sort ? transformSort(query.sort.split(',')) : undefined
 );
+
+const getOperator = (query) => {
+  const { op='and' } = query;
+  return LOG_OPERATORS[op] ? LOG_OPERATORS[op] : LOG_OPERATORS.and;
+};
 
 const transformSort = (sort) => {
   const regex = /^(.*?)(?:\s(ASC|DESC))?$/;
