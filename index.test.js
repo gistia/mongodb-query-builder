@@ -40,6 +40,17 @@ describe('Query Builder', () => {
     });
   });
 
+  describe('no filters', function() {
+    it('does not create an empty array', () => {
+      const query = { };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { };
+
+      expect(result).to.eql(expected);
+    });
+  });
+
   describe('filters', () => {
     it('selects filters case sensitve', () => {
       const query = { 'Person.FirstName.eq': 'John', 'Person.LastName.eq': 'Snow' };
@@ -149,7 +160,7 @@ describe('Query Builder', () => {
     });
 
     it('uses or operator', function() {
-      const query = { 'Person.firstName.eq': 'null', op: 'or' };
+      const query = { 'Person.firstName.eq': 'null', _op: 'or' };
 
       const result = QueryBuilder.build(query).filters;
       const expected = { $or : [ { 'Person.firstName': { $eq: null } } ] };
@@ -158,7 +169,7 @@ describe('Query Builder', () => {
     });
 
     it('sends invalid operator then uses $and', function() {
-      const query = { 'Person.firstName.eq': 'null', op: 'xor' };
+      const query = { 'Person.firstName.eq': 'null', _op: 'xor' };
 
       const result = QueryBuilder.build(query).filters;
       const expected = { $and : [ { 'Person.firstName': { $eq: null } } ] };
