@@ -40,12 +40,23 @@ describe('Query Builder', () => {
     });
   });
 
+  describe('no filters', function() {
+    it('does not create an empty array', () => {
+      const query = { };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { };
+
+      expect(result).to.eql(expected);
+    });
+  });
+
   describe('filters', () => {
     it('selects filters case sensitve', () => {
       const query = { 'Person.FirstName.eq': 'John', 'Person.LastName.eq': 'Snow' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { 'Person.FirstName': { $eq: 'John' }, 'Person.LastName': { $eq: 'Snow' } };
+      const expected = { $and : [{ 'Person.FirstName': { $eq: 'John' } },{ 'Person.LastName': { $eq: 'Snow' } }] };
 
       expect(result).to.eql(expected);
     });
@@ -54,8 +65,7 @@ describe('Query Builder', () => {
       const query = { 'firstName.eq': 'John', page: 1, limit: 10 };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { firstName: { $eq: 'John' } };
-
+      const expected = { $and: [ {firstName: { $eq: 'John' }} ] };
       expect(result).to.eql(expected);
     });
 
@@ -63,7 +73,7 @@ describe('Query Builder', () => {
       const query = { 'firstName.eq': 'John', sort: 'Status' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { firstName: { $eq: 'John' } };
+      const expected = { $and: [{firstName: { $eq: 'John' }}] };
 
       expect(result).to.eql(expected);
     });
@@ -72,7 +82,7 @@ describe('Query Builder', () => {
       const query = { 'firstName.eq': 'John', 'lastName.eq': 'Snow' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { firstName: { $eq: 'John' }, lastName: { $eq: 'Snow' } };
+      const expected = { $and:[ {firstName: { $eq: 'John' }}, {lastName: { $eq: 'Snow' }} ]};
 
       expect(result).to.eql(expected);
     });
@@ -81,7 +91,7 @@ describe('Query Builder', () => {
       const query = { firstName: 'John', lastName: 'Snow' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { firstName: { $eq: 'John' }, lastName: { $eq: 'Snow' } };
+      const expected = { $and: [ {firstName: { $eq: 'John' }}, {lastName: { $eq: 'Snow' }} ] };
 
       expect(result).to.eql(expected);
     });
@@ -90,7 +100,7 @@ describe('Query Builder', () => {
       const query = { 'firstName.ne': 'oh' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { firstName: { $ne: 'oh' } };
+      const expected = { $and: [{firstName: { $ne: 'oh' }}]  };
 
       expect(result).to.eql(expected);
     });
@@ -99,7 +109,7 @@ describe('Query Builder', () => {
       const query = { 'firstName.lt': 'oh' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { firstName: { $lt: 'oh' } };
+      const expected = { $and: [{ firstName: { $lt: 'oh' } }]  };
 
       expect(result).to.eql(expected);
     });
@@ -108,7 +118,7 @@ describe('Query Builder', () => {
       const query = { 'firstName.lte': 'oh' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { firstName: { $lte: 'oh' } };
+      const expected = { $and: [{firstName: { $lte: 'oh' }}]  };
 
       expect(result).to.eql(expected);
     });
@@ -117,7 +127,7 @@ describe('Query Builder', () => {
       const query = { 'Person.firstName.gt': 'oh' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { 'Person.firstName': { $gt: 'oh' } };
+      const expected = { $and : [{ 'Person.firstName': { $gt: 'oh' } }] };
 
       expect(result).to.eql(expected);
     });
@@ -126,7 +136,7 @@ describe('Query Builder', () => {
       const query = { 'Person.firstName.gte': 'oh' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { 'Person.firstName': { $gte: 'oh' } };
+      const expected = { $and: [ { 'Person.firstName': { $gte: 'oh' } } ] };
 
       expect(result).to.eql(expected);
     });
@@ -135,7 +145,7 @@ describe('Query Builder', () => {
       const query = { 'Person.firstName.contains': 'oh' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { 'Person.firstName': { $regex: 'oh', $options: 'i' } };
+      const expected = { $and: [ { 'Person.firstName': { $regex: 'oh', $options: 'i' } } ] };
 
       expect(result).to.eql(expected);
     });
@@ -144,7 +154,25 @@ describe('Query Builder', () => {
       const query = { 'Person.firstName.eq': 'null' };
 
       const result = QueryBuilder.build(query).filters;
-      const expected = { 'Person.firstName': { $eq: null } };
+      const expected = { $and : [ { 'Person.firstName': { $eq: null } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('uses or operator', function() {
+      const query = { 'Person.firstName.eq': 'null', _op: 'or' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $or : [ { 'Person.firstName': { $eq: null } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('sends invalid operator then uses $and', function() {
+      const query = { 'Person.firstName.eq': 'null', _op: 'xor' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and : [ { 'Person.firstName': { $eq: null } } ] };
 
       expect(result).to.eql(expected);
     });
@@ -184,6 +212,36 @@ describe('Query Builder', () => {
       const result = QueryBuilder.build(query).sort;
 
       expect(result).to.be.undefined;
+    });
+  });
+
+
+  describe('fields', function() {
+    it('selects single field', () => {
+      const query = { _fields: 'OrderId' };
+
+      const result = QueryBuilder.build(query).fields;
+      const expected = { OrderId:  1 };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('selects multiple fields', () => {
+      const query = { _fields: 'OrderId, Name' };
+
+      const result = QueryBuilder.build(query).fields;
+      const expected = { OrderId:  1, Name: 1 };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('return undefined when no fields', function() {
+      const query = {};
+
+      const result = QueryBuilder.build(query).fields;
+      const expected = undefined;
+
+      expect(result).to.eql(expected);
     });
   });
 });

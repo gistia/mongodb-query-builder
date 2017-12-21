@@ -8,7 +8,12 @@ const OPERATORS = {
   gte:      { op: '$gte' },
 };
 
-const FILTERS_KEYWORDS = ['page', 'limit', 'sort'];
+const LOG_OPERATORS = {
+  and: '$and',
+  or: '$or',
+};
+
+const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
 
 const castValues = (value) => {
   if (value === 'null') {
@@ -19,7 +24,8 @@ const castValues = (value) => {
 };
 
 const getFilters = (query) => {
-  return Object.keys(query)
+  const operator = getOperator(query);
+  const filters = Object.keys(query)
     .filter(key => !FILTERS_KEYWORDS.includes(key))
     .reduce((acc, key) => {
       const field = key.split('.');
@@ -27,8 +33,11 @@ const getFilters = (query) => {
       const { op, options } = OPERATORS[filterOperator];
       const filter = { [op]: castValues(query[key]) };
       if (options) { Object.assign(filter,  options) };
-      return Object.assign(acc, { [field.join('.')]: filter });
-    }, {});
+      acc[operator].push({ [field.join('.')]: filter })
+      return acc;
+    }, { [operator] : [] });
+
+  return filters[operator].length ? filters : {};
 };
 
 const getPagination = (query) => {
@@ -49,6 +58,24 @@ const getSort = (query) => (
   query.sort ? transformSort(query.sort.split(',')) : undefined
 );
 
+const getOperator = (query) => {
+  const { _op='and' } = query;
+  return LOG_OPERATORS[_op] ? LOG_OPERATORS[_op] : LOG_OPERATORS.and;
+};
+
+const getFields = (query) => {
+  const { _fields } = query;
+  if(!_fields) {
+    return undefined
+  }
+
+  return _fields.split(',').reduce((acc, field) => {
+    acc[field.trim()] = 1;
+    return acc;
+  }, {});
+
+}
+
 const transformSort = (sort) => {
   const regex = /^(.*?)(?:\s(ASC|DESC))?$/;
   if (!sort) {
@@ -68,11 +95,13 @@ class QueryBuilder {
     const filters = getFilters(query);
     const pagination = getPagination(query);
     const sort = getSort(query);
+    const fields = getFields(query);
 
     return {
       pagination,
       filters,
       sort,
+      fields,
     };
   }
 }
