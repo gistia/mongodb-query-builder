@@ -214,4 +214,34 @@ describe('Query Builder', () => {
       expect(result).to.be.undefined;
     });
   });
+
+
+  describe('fields', function() {
+    it('selects single field', () => {
+      const query = { _fields: 'OrderId' };
+
+      const result = QueryBuilder.build(query).fields;
+      const expected = { OrderId:  1 };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('selects multiple fields', () => {
+      const query = { _fields: 'OrderId, Name' };
+
+      const result = QueryBuilder.build(query).fields;
+      const expected = { OrderId:  1, Name: 1 };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('return undefined when no fields', function() {
+      const query = {};
+
+      const result = QueryBuilder.build(query).fields;
+      const expected = undefined;
+
+      expect(result).to.eql(expected);
+    });
+  });
 });

@@ -13,7 +13,7 @@ const LOG_OPERATORS = {
   or: '$or',
 };
 
-const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op'];
+const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
 
 const castValues = (value) => {
   if (value === 'null') {
@@ -63,6 +63,19 @@ const getOperator = (query) => {
   return LOG_OPERATORS[_op] ? LOG_OPERATORS[_op] : LOG_OPERATORS.and;
 };
 
+const getFields = (query) => {
+  const { _fields } = query;
+  if(!_fields) {
+    return undefined
+  }
+
+  return _fields.split(',').reduce((acc, field) => {
+    acc[field.trim()] = 1;
+    return acc;
+  }, {});
+
+}
+
 const transformSort = (sort) => {
   const regex = /^(.*?)(?:\s(ASC|DESC))?$/;
   if (!sort) {
@@ -82,11 +95,13 @@ class QueryBuilder {
     const filters = getFilters(query);
     const pagination = getPagination(query);
     const sort = getSort(query);
+    const fields = getFields(query);
 
     return {
       pagination,
       filters,
       sort,
+      fields,
     };
   }
 }
