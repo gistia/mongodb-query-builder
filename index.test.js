@@ -141,6 +141,24 @@ describe('Query Builder', () => {
       expect(result).to.eql(expected);
     });
 
+    it('receives in operation with single elements', () => {
+      const query = { 'Person.firstName.in': 'oh' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [ { 'Person.firstName': { $in: [ 'oh' ] } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('receives in operation with multiples elements', () => {
+            const query = { 'Person.firstName.in': 'oh,my,god' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [ { 'Person.firstName': { $in: [ 'oh', 'my', 'god' ] } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
     it('receives contains operation', () => {
       const query = { 'Person.firstName.contains': 'oh' };
 
@@ -214,7 +232,6 @@ describe('Query Builder', () => {
       expect(result).to.be.undefined;
     });
   });
-
 
   describe('fields', function() {
     it('selects single field', () => {

@@ -6,6 +6,7 @@ const OPERATORS = {
   lte:      { op: '$lte' },
   gt:       { op: '$gt' },
   gte:      { op: '$gte' },
+  in:       { op: '$in', transform: (value) => typeof value === 'string' ? value.split(',') : value,  },
 };
 
 const LOG_OPERATORS = {
@@ -15,11 +16,11 @@ const LOG_OPERATORS = {
 
 const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
 
-const castValues = (value) => {
+const castValues = (value, transform) => {
   if (value === 'null') {
     return null;
   } else {
-    return value;
+    return transform ? transform(value) : value;
   }
 };
 
@@ -30,8 +31,8 @@ const getFilters = (query) => {
     .reduce((acc, key) => {
       const field = key.split('.');
       const filterOperator = Object.keys(OPERATORS).includes(field[field.length - 1]) ? field.pop() : 'eq';
-      const { op, options } = OPERATORS[filterOperator];
-      const filter = { [op]: castValues(query[key]) };
+      const { op, options, transform } = OPERATORS[filterOperator];
+      const filter = { [op]: castValues(query[key], transform) };
       if (options) { Object.assign(filter,  options) };
       acc[operator].push({ [field.join('.')]: filter })
       return acc;
