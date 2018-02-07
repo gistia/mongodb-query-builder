@@ -159,6 +159,24 @@ describe('Query Builder', () => {
       expect(result).to.eql(expected);
     });
 
+    it('receives exists operation', () => {
+      const query = { 'firstName.exists': 'true' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [{firstName: { $exists: true }}]  };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('receives exists operation with an invalid value', () => {
+      const query = { 'firstName.exists': 'any-invalid-value' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [{firstName: { $exists: false }}]  };
+
+      expect(result).to.eql(expected);
+    });
+
     it('receives contains operation', () => {
       const query = { 'Person.firstName.contains': 'oh' };
 

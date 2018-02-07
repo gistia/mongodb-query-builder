@@ -7,11 +7,13 @@ const OPERATORS = {
   gt:       { op: '$gt' },
   gte:      { op: '$gte' },
   in:       { op: '$in', transform: (value) => typeof value === 'string' ? value.split(',') : value,  },
+  exists:   { op: '$exists', transform: (value) => value === 'true', },
 };
 
 const LOG_OPERATORS = {
   and: '$and',
   or: '$or',
+  exists: '$exists',
 };
 
 const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
