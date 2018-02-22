@@ -212,6 +212,15 @@ describe('Query Builder', () => {
 
       expect(result).to.eql(expected);
     });
+
+    it('converts string into date', function() {
+      const query = { 'CreatedAt': '2017-08-22T20:33:32.780Z' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and : [ { 'CreatedAt': { $eq: new Date(Date.parse('2017-08-22T20:33:32.780Z' )) } } ] };
+
+      expect(result).to.eql(expected);
+    });
   });
 
   describe('sort', () => {

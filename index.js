@@ -17,10 +17,16 @@ const LOG_OPERATORS = {
 };
 
 const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
+const REGEX_ISO_8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/;
 
 const castValues = (value, transform) => {
   if (value === 'null') {
     return null;
+  } else if (typeof value === 'string' && (match = value.match(REGEX_ISO_8601))) {
+    var milliseconds = Date.parse(match[0]);
+    if (!isNaN(milliseconds)) {
+      return new Date(milliseconds);
+    }
   } else {
     return transform ? transform(value) : value;
   }
