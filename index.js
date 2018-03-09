@@ -7,7 +7,7 @@ const OPERATORS = {
   gt:       { op: '$gt' },
   gte:      { op: '$gte' },
   in:       { op: '$in', transform: (value) => typeof value === 'string' ? value.split(',') : value,  },
-  exists:   { op: '$exists', transform: (value) => value === 'true', },
+  exists:   { op: '$exists', transform: (value) => value === 'true' },
 };
 
 const LOG_OPERATORS = {
@@ -20,6 +20,7 @@ const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
 const REGEX_ISO_8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/;
 
 const castValues = (value, transform) => {
+  value = transform ? castValues(transform(value)) : value
   if (value === 'null') {
     return null;
   } else if (typeof value === 'string' && (match = value.match(REGEX_ISO_8601))) {
@@ -27,8 +28,10 @@ const castValues = (value, transform) => {
     if (!isNaN(milliseconds)) {
       return new Date(milliseconds);
     }
+  } else if (Array.isArray(value)) {
+    return value.map((v) => castValues(v));
   } else {
-    return transform ? transform(value) : value;
+    return value;
   }
 };
 

@@ -170,6 +170,26 @@ describe('Query Builder', () => {
       expect(result).to.eql(expected);
     });
 
+    it('receives in operation with null element', () => {
+      const query = { 'Person.firstName.in': 'null' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [ { 'Person.firstName': { $in: [ null ] } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('receives in operation with miltiples values including null', () => {
+      const query = { 'Person.firstName.in': 'oh,my,null,god' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [ { 'Person.firstName': { $in: [ 'oh', 'my', null, 'god' ] } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
+
+
     it('receives in operation with single elements', () => {
       const query = { 'Person.firstName.in': 'oh' };
 
@@ -217,6 +237,15 @@ describe('Query Builder', () => {
 
     it('converts null string into null', () => {
       const query = { 'Person.firstName.eq': 'null' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and : [ { 'Person.firstName': { $eq: null } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('converts null string into null event inside arrays', () => {
+      const query = { 'Person.firstName.eq': [ 'null' ] };
 
       const result = QueryBuilder.build(query).filters;
       const expected = { $and : [ { 'Person.firstName': { $eq: null } } ] };
