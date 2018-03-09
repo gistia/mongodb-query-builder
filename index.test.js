@@ -96,7 +96,36 @@ describe('Query Builder', () => {
       expect(result).to.eql(expected);
     });
 
-    it('receives ne operation', () => {
+    it('receives eq operation multiple values', () => {
+      const query = { 'firstName.eq': [ 'John', 'Doe' ] };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = {
+        $and: [
+          {firstName: { $eq: 'John' }},
+          {firstName: { $eq: 'Doe' }}
+        ]
+      };
+
+      expect(result).to.eql(expected);
+    });
+
+
+    it('receives ne operation multiple values', () => {
+      const query = { 'firstName.ne': ['oh', 'no'] };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = {
+        $and: [
+          {firstName: { $ne: 'oh' }},
+          {firstName: { $ne: 'no' }}
+        ]
+      };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('receives ne operation single value', () => {
       const query = { 'firstName.ne': 'oh' };
 
       const result = QueryBuilder.build(query).filters;

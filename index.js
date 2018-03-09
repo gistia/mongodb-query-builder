@@ -40,9 +40,13 @@ const getFilters = (query) => {
       const field = key.split('.');
       const filterOperator = Object.keys(OPERATORS).includes(field[field.length - 1]) ? field.pop() : 'eq';
       const { op, options, transform } = OPERATORS[filterOperator];
-      const filter = { [op]: castValues(query[key], transform) };
-      if (options) { Object.assign(filter,  options) };
-      acc[operator].push({ [field.join('.')]: filter })
+      const values = castValues(query[key], transform);
+      (Array.isArray(values) && op !== '$in' ? values : [values]).forEach((value) => {
+        const filter = { [op]: value };
+        if (options) { Object.assign(filter,  options) };
+        acc[operator].push({ [field.join('.')]: filter });
+      })
+
       return acc;
     }, { [operator] : [] });
 
