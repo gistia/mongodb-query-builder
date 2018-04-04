@@ -13,7 +13,6 @@ const OPERATORS = {
 const LOG_OPERATORS = {
   and: '$and',
   or: '$or',
-  exists: '$exists',
 };
 
 const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
