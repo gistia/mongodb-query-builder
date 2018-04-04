@@ -8,12 +8,12 @@ const OPERATORS = {
   gte:      { op: '$gte' },
   in:       { op: '$in', transform: (value) => typeof value === 'string' ? value.split(',') : value,  },
   exists:   { op: '$exists', transform: (value) => value === 'true' },
+  eqInt:    { op: '$eq', transform: (value) => transformToInt(value) },
 };
 
 const LOG_OPERATORS = {
   and: '$and',
   or: '$or',
-  exists: '$exists',
 };
 
 const FILTERS_KEYWORDS = ['page', 'limit', 'sort', '_op', '_fields'];
@@ -104,6 +104,11 @@ const transformSort = (sort) => {
     hash[field] = order;
     return hash;
   }, {});
+};
+
+const transformToInt = (value) => {
+  const integer = new Number(value) + 0;
+  return !isNaN(integer) ? integer : value;
 };
 
 class QueryBuilder {

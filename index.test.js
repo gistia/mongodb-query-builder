@@ -226,6 +226,33 @@ describe('Query Builder', () => {
       expect(result).to.eql(expected);
     });
 
+    it('receives eqInt operation', () => {
+      const query = { 'age.eqInt': '33' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [{age: { $eq: 33 }}]  };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('receives eqInt with a invalid number', () => {
+      const query = { 'age.eqInt': '47xpto' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [{age: { $eq: '47xpto' }}]  };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('receives eqInt with null values', () => {
+      const query = { 'age.eqInt': 'null', 'fingersCount.eq': null };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and: [{age: { $eq: null }}, {fingersCount: {$eq: null}}]  };
+
+      expect(result).to.eql(expected);
+    });
+
     it('receives contains operation', () => {
       const query = { 'Person.firstName.contains': 'oh' };
 
