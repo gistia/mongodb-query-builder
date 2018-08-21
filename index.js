@@ -23,6 +23,8 @@ const castValues = (value, transform) => {
   value = transform ? castValues(transform(value)) : value
   if (value === 'null') {
     return null;
+  } else if (value === 'true' || value === 'false') {
+    return value === 'true';
   } else if (typeof value === 'string' && (match = value.match(REGEX_ISO_8601))) {
     var milliseconds = Date.parse(match[0]);
     if (!isNaN(milliseconds)) {

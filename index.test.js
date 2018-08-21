@@ -280,6 +280,26 @@ describe('Query Builder', () => {
       expect(result).to.eql(expected);
     });
 
+    describe('converts true/false string into boolean', () => {
+      it('converts true', () => {
+        const query = { 'Person.firstName.eq': 'true' };
+
+        const result = QueryBuilder.build(query).filters;
+        const expected = { $and : [ { 'Person.firstName': { $eq: true } } ] };
+
+        expect(result).to.eql(expected);
+      });
+
+      it('converts false', () => {
+        const query = { 'Person.firstName.eq': 'false' };
+
+        const result = QueryBuilder.build(query).filters;
+        const expected = { $and : [ { 'Person.firstName': { $eq: false } } ] };
+
+        expect(result).to.eql(expected);
+      });
+    });
+
     it('uses or operator', function() {
       const query = { 'Person.firstName.eq': 'null', _op: 'or' };
 
