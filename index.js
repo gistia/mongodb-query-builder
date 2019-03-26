@@ -1,3 +1,12 @@
+const moment = require('moment');
+
+const DEFAULT_FILTERS = {
+  'eqDate': (date) => ({
+    '$gte': new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)),
+    '$lt': new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 59)),
+  })
+}
+
 const OPERATORS = {
   eq:       { op: '$eq' },
   ne:       { op: '$ne' },
@@ -9,6 +18,7 @@ const OPERATORS = {
   in:       { op: '$in', transform: (value) => typeof value === 'string' ? value.split(',') : value,  },
   exists:   { op: '$exists', transform: (value) => value === 'true' },
   eqInt:    { op: '$eq', transform: (value) => transformToInt(value) },
+  eqDate: { customFilter: DEFAULT_FILTERS['eqDate'] },
 };
 
 const LOG_OPERATORS = {
@@ -30,6 +40,8 @@ const castValues = (value, transform) => {
     if (!isNaN(milliseconds)) {
       return new Date(milliseconds);
     }
+  } else if (typeof value === 'string' && moment(value, 'YYYY-MM-DD').isValid()) {
+   return moment(value, 'YYYY-MM-DD').toDate();
   } else if (Array.isArray(value)) {
     return value.map((v) => castValues(v));
   } else {
@@ -44,10 +56,10 @@ const getFilters = (query) => {
     .reduce((acc, key) => {
       const field = key.split('.');
       const filterOperator = Object.keys(OPERATORS).includes(field[field.length - 1]) ? field.pop() : 'eq';
-      const { op, options, transform } = OPERATORS[filterOperator];
+      const { op, options, transform, customFilter } = OPERATORS[filterOperator];
       const values = castValues(query[key], transform);
       (Array.isArray(values) && op !== '$in' ? values : [values]).forEach((value) => {
-        const filter = { [op]: value };
+        const filter = customFilter ? customFilter(value) : { [op]: value };
         if (options) { Object.assign(filter,  options) };
         acc[operator].push({ [field.join('.')]: filter });
       })

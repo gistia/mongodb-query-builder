@@ -20,5 +20,7 @@
     "istanbul": "^0.4.5",
     "mocha": "https://github.com/gistia/mocha.git"
   },
-  "dependencies": {}
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
 }
