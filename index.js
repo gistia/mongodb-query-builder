@@ -1,10 +1,16 @@
 const moment = require('moment');
 
 const DEFAULT_FILTERS = {
-  'eqDate': (date) => ({
-    '$gte': new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)),
-    '$lt': new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 59)),
-  })
+  'eqDate': (date) => {
+    if (!moment(date, 'YYYY-MM-DD', true).isValid()) {
+      return null;
+    }
+
+    return {
+      '$gte': moment(`${date}T00:00:00.000Z`).toDate(),
+      '$lt': moment(`${date}T23:59:59.059Z`).toDate(),
+    };
+  }
 }
 
 const OPERATORS = {
@@ -40,8 +46,6 @@ const castValues = (value, transform) => {
     if (!isNaN(milliseconds)) {
       return new Date(milliseconds);
     }
-  } else if (typeof value === 'string' && moment(value, 'YYYY-MM-DD', true).isValid()) {
-   return moment(value, 'YYYY-MM-DD').toDate();
   } else if (Array.isArray(value)) {
     return value.map((v) => castValues(v));
   } else {
@@ -60,6 +64,7 @@ const getFilters = (query) => {
       const values = castValues(query[key], transform);
       (Array.isArray(values) && op !== '$in' ? values : [values]).forEach((value) => {
         const filter = customFilter ? customFilter(value) : { [op]: value };
+        console.log('filter', filter);
         if (options) { Object.assign(filter,  options) };
         acc[operator].push({ [field.join('.')]: filter });
       })

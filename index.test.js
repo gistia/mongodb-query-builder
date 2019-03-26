@@ -337,6 +337,15 @@ describe('Query Builder', () => {
 
       expect(result).to.eql(expected);
     });
+
+    it('eqDate with invalid value', function() {
+      const query = { 'CreatedAt.eqDate': '1234' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and : [ { 'CreatedAt': null } ] };
+
+      expect(result).to.eql(expected);
+    });
   });
 
   describe('sort', () => {
