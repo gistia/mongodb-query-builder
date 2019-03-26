@@ -189,7 +189,6 @@ describe('Query Builder', () => {
     });
 
 
-
     it('receives in operation with single elements', () => {
       const query = { 'Person.firstName.in': 'oh' };
 
@@ -323,6 +322,18 @@ describe('Query Builder', () => {
 
       const result = QueryBuilder.build(query).filters;
       const expected = { $and : [ { 'CreatedAt': { $eq: new Date(Date.parse('2017-08-22T20:33:32.780Z' )) } } ] };
+
+      expect(result).to.eql(expected);
+    });
+
+    it('converts string into date without time using custom filter', function() {
+      const query = { 'CreatedAt.eqDate': '2017-08-22' };
+
+      const result = QueryBuilder.build(query).filters;
+      const expected = { $and : [ { 'CreatedAt': {
+        $gte: new Date(Date.parse('2017-08-22T00:00:00.000Z' )),
+        $lt: new Date(Date.parse('2017-08-22T23:59:59.059Z' ))
+      } } ] };
 
       expect(result).to.eql(expected);
     });

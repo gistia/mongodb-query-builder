@@ -18,7 +18,7 @@ const OPERATORS = {
   in:       { op: '$in', transform: (value) => typeof value === 'string' ? value.split(',') : value,  },
   exists:   { op: '$exists', transform: (value) => value === 'true' },
   eqInt:    { op: '$eq', transform: (value) => transformToInt(value) },
-  eqDate: { customFilter: DEFAULT_FILTERS['eqDate'] },
+  eqDate:   { customFilter: DEFAULT_FILTERS['eqDate'] },
 };
 
 const LOG_OPERATORS = {
@@ -40,7 +40,7 @@ const castValues = (value, transform) => {
     if (!isNaN(milliseconds)) {
       return new Date(milliseconds);
     }
-  } else if (typeof value === 'string' && moment(value, 'YYYY-MM-DD').isValid()) {
+  } else if (typeof value === 'string' && moment(value, 'YYYY-MM-DD', true).isValid()) {
    return moment(value, 'YYYY-MM-DD').toDate();
   } else if (Array.isArray(value)) {
     return value.map((v) => castValues(v));
