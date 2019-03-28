@@ -64,7 +64,6 @@ const getFilters = (query) => {
       const values = castValues(query[key], transform);
       (Array.isArray(values) && op !== '$in' ? values : [values]).forEach((value) => {
         const filter = customFilter ? customFilter(value) : { [op]: value };
-        console.log('filter', filter);
         if (options) { Object.assign(filter,  options) };
         acc[operator].push({ [field.join('.')]: filter });
       })
